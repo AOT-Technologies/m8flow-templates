@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-  id="Defs_Onboarding" targetNamespace="https://example.com/spiffarena/templates/onboarding">
-
-  <bpmn:process id="Process_EmployeeOnboarding" name="Employee Onboarding" isExecutable="true">
-
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_Onboarding" targetNamespace="https://example.com/spiffarena/templates/onboarding">
+  <bpmn:process id="Process_EmployeeOnboarding_1768881387" name="Employee Onboarding" isExecutable="true">
     <bpmn:laneSet id="LaneSet_Onboarding">
       <bpmn:lane id="Lane_HR" name="HR">
-        <bpmn:flowNodeRef>Start_Onboarding</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_CaptureDetails</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_SendWelcome</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Onboarding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CaptureDetails</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Start_Onboarding</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Manager" name="Manager">
         <bpmn:flowNodeRef>Task_ManagerApprove</bpmn:flowNodeRef>
@@ -22,269 +15,261 @@
         <bpmn:flowNodeRef>End_Rejected</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_IT" name="IT / Shared Services">
-        <bpmn:flowNodeRef>Gateway_ForkProvisioning</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_CreateAccounts</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ProvisionLaptop</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SetupPayroll</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>BoundaryTimer_Accounts</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>BoundaryTimer_Laptop</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>BoundaryTimer_Payroll</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ForkProvisioning</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_EscalateProvisioning</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryTimer_Laptop</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_JoinProvisioning</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SetupPayroll</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryTimer_Payroll</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-
     <bpmn:startEvent id="Start_Onboarding" name="New Hire Created" />
-
     <bpmn:userTask id="Task_CaptureDetails" name="Capture Employee Details">
       <bpmn:documentation>HR captures name, role, start_date, manager, department, location.</bpmn:documentation>
     </bpmn:userTask>
-
     <bpmn:userTask id="Task_ManagerApprove" name="Manager Approval">
       <bpmn:documentation>Manager approves onboarding request.</bpmn:documentation>
     </bpmn:userTask>
-
     <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?" />
-
     <bpmn:userTask id="Task_NotifyRejection" name="Notify Rejection">
       <bpmn:documentation>Notify HR + requester; close case.</bpmn:documentation>
     </bpmn:userTask>
-
     <bpmn:endEvent id="End_Rejected" name="Rejected" />
-
     <bpmn:parallelGateway id="Gateway_ForkProvisioning" name="Provision in Parallel" />
-
     <bpmn:serviceTask id="Task_CreateAccounts" name="Create Accounts">
       <bpmn:documentation>Service Task: Use SpiffArena connector (e.g., Google/Okta) to provision accounts.</bpmn:documentation>
     </bpmn:serviceTask>
-
-    <bpmn:boundaryEvent id="BoundaryTimer_Accounts" name="Accounts SLA" attachedToRef="Task_CreateAccounts" cancelActivity="false">
+    <bpmn:boundaryEvent id="BoundaryTimer_Accounts" name="Accounts SLA" cancelActivity="false" attachedToRef="Task_CreateAccounts">
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration>PT24H</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-
     <bpmn:serviceTask id="Task_ProvisionLaptop" name="Provision Laptop">
       <bpmn:documentation>Service/User Task: Create asset ticket in ITSM; track shipment.</bpmn:documentation>
+      <bpmn:incoming>Flow_O_Pay</bpmn:incoming>
     </bpmn:serviceTask>
-
-    <bpmn:boundaryEvent id="BoundaryTimer_Laptop" name="Laptop SLA" attachedToRef="Task_ProvisionLaptop" cancelActivity="false">
+    <bpmn:boundaryEvent id="BoundaryTimer_Laptop" name="Laptop SLA" cancelActivity="false" attachedToRef="Task_ProvisionLaptop">
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration>P2D</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-
     <bpmn:serviceTask id="Task_SetupPayroll" name="Setup Payroll">
       <bpmn:documentation>Service Task: Create payroll profile in HRIS.</bpmn:documentation>
+      <bpmn:incoming>Flow_O_Lap</bpmn:incoming>
     </bpmn:serviceTask>
-
-    <bpmn:boundaryEvent id="BoundaryTimer_Payroll" name="Payroll SLA" attachedToRef="Task_SetupPayroll" cancelActivity="false">
+    <bpmn:boundaryEvent id="BoundaryTimer_Payroll" name="Payroll SLA" cancelActivity="false" attachedToRef="Task_SetupPayroll">
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration>P1D</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-
     <bpmn:userTask id="Task_EscalateProvisioning" name="Escalate Provisioning">
       <bpmn:documentation>Triggered by SLA timers; notify IT lead/manager and re-prioritize.</bpmn:documentation>
     </bpmn:userTask>
-
     <bpmn:parallelGateway id="Gateway_JoinProvisioning" name="All Provisioned" />
-
     <bpmn:serviceTask id="Task_SendWelcome" name="Send Welcome Email">
       <bpmn:documentation>Service Task: Send welcome email with first-day instructions.</bpmn:documentation>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="End_Onboarding" name="Onboarding Complete" />
-
-    <!-- Sequence Flows -->
     <bpmn:sequenceFlow id="Flow_O_1" sourceRef="Start_Onboarding" targetRef="Task_CaptureDetails" />
     <bpmn:sequenceFlow id="Flow_O_2" sourceRef="Task_CaptureDetails" targetRef="Task_ManagerApprove" />
     <bpmn:sequenceFlow id="Flow_O_3" sourceRef="Task_ManagerApprove" targetRef="Gateway_Approved" />
-
     <bpmn:sequenceFlow id="Flow_O_Reject" sourceRef="Gateway_Approved" targetRef="Task_NotifyRejection">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[approved == false]]></bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">approved == false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_O_RejectEnd" sourceRef="Task_NotifyRejection" targetRef="End_Rejected" />
-
     <bpmn:sequenceFlow id="Flow_O_Approve" sourceRef="Gateway_Approved" targetRef="Gateway_ForkProvisioning">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[approved == true]]></bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">approved == true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
     <bpmn:sequenceFlow id="Flow_O_Acct" sourceRef="Gateway_ForkProvisioning" targetRef="Task_CreateAccounts" />
-    <bpmn:sequenceFlow id="Flow_O_Lap" sourceRef="Gateway_ForkProvisioning" targetRef="Task_ProvisionLaptop" />
-    <bpmn:sequenceFlow id="Flow_O_Pay" sourceRef="Gateway_ForkProvisioning" targetRef="Task_SetupPayroll" />
-
+    <bpmn:sequenceFlow id="Flow_O_Lap" sourceRef="Gateway_ForkProvisioning" targetRef="Task_SetupPayroll" />
+    <bpmn:sequenceFlow id="Flow_O_Pay" sourceRef="Gateway_ForkProvisioning" targetRef="Task_ProvisionLaptop" />
     <bpmn:sequenceFlow id="Flow_O_AcctDone" sourceRef="Task_CreateAccounts" targetRef="Gateway_JoinProvisioning" />
     <bpmn:sequenceFlow id="Flow_O_LapDone" sourceRef="Task_ProvisionLaptop" targetRef="Gateway_JoinProvisioning" />
     <bpmn:sequenceFlow id="Flow_O_PayDone" sourceRef="Task_SetupPayroll" targetRef="Gateway_JoinProvisioning" />
-
     <bpmn:sequenceFlow id="Flow_O_JoinToWelcome" sourceRef="Gateway_JoinProvisioning" targetRef="Task_SendWelcome" />
     <bpmn:sequenceFlow id="Flow_O_WelcomeToEnd" sourceRef="Task_SendWelcome" targetRef="End_Onboarding" />
-
-    <!-- SLA escalation paths (non-interrupting) -->
     <bpmn:sequenceFlow id="Flow_O_SLA_Acct" sourceRef="BoundaryTimer_Accounts" targetRef="Task_EscalateProvisioning" />
     <bpmn:sequenceFlow id="Flow_O_SLA_Lap" sourceRef="BoundaryTimer_Laptop" targetRef="Task_EscalateProvisioning" />
     <bpmn:sequenceFlow id="Flow_O_SLA_Pay" sourceRef="BoundaryTimer_Payroll" targetRef="Task_EscalateProvisioning" />
-
   </bpmn:process>
-
-  <!-- Diagram Interchange (required for bpmn-js based modelers) -->
   <bpmndi:BPMNDiagram id="Diagram_Onboarding">
-    <bpmndi:BPMNPlane id="Plane_Onboarding" bpmnElement="Process_EmployeeOnboarding">
-
-      <!-- Lanes -->
-      <bpmndi:BPMNShape id="Lane_HR_di" bpmnElement="Lane_HR" isHorizontal="true">
-        <dc:Bounds x="120" y="80" width="1360" height="170" />
+    <bpmndi:BPMNPlane id="Plane_Onboarding" bpmnElement="Process_EmployeeOnboarding_1768881387">
+      <bpmndi:BPMNShape id="Lane_IT_di" bpmnElement="Lane_IT" isHorizontal="true">
+        <dc:Bounds x="120" y="420" width="1550" height="460" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Manager_di" bpmnElement="Lane_Manager" isHorizontal="true">
-        <dc:Bounds x="120" y="250" width="1360" height="170" />
+        <dc:Bounds x="120" y="250" width="1550" height="170" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_IT_di" bpmnElement="Lane_IT" isHorizontal="true">
-        <dc:Bounds x="120" y="420" width="1360" height="220" />
+      <bpmndi:BPMNShape id="Lane_HR_di" bpmnElement="Lane_HR" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1550" height="170" />
       </bpmndi:BPMNShape>
-
-      <!-- Nodes -->
       <bpmndi:BPMNShape id="Start_Onboarding_di" bpmnElement="Start_Onboarding">
-        <dc:Bounds x="170" y="145" width="36" height="36" />
+        <dc:Bounds x="170" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="143" y="168" width="90" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_CaptureDetails_di" bpmnElement="Task_CaptureDetails">
-        <dc:Bounds x="250" y="120" width="200" height="80" />
+        <dc:Bounds x="270" y="131" width="200" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_ManagerApprove_di" bpmnElement="Task_ManagerApprove">
         <dc:Bounds x="500" y="290" width="200" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Gateway_Approved_di" bpmnElement="Gateway_Approved" isMarkerVisible="true">
         <dc:Bounds x="740" y="305" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="737" y="281" width="55" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_NotifyRejection_di" bpmnElement="Task_NotifyRejection">
         <dc:Bounds x="850" y="290" width="210" height="80" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="End_Rejected_di" bpmnElement="End_Rejected">
-        <dc:Bounds x="1100" y="312" width="36" height="36" />
+        <dc:Bounds x="1202" y="312" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1198" y="348" width="45" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Gateway_ForkProvisioning_di" bpmnElement="Gateway_ForkProvisioning" isMarkerVisible="true">
-        <dc:Bounds x="850" y="505" width="50" height="50" />
+        <dc:Bounds x="595" y="505" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="525.5" y="516" width="59" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Task_CreateAccounts_di" bpmnElement="Task_CreateAccounts">
         <dc:Bounds x="950" y="450" width="210" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ProvisionLaptop_di" bpmnElement="Task_ProvisionLaptop">
+        <dc:Bounds x="950" y="540" width="210" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SetupPayroll_di" bpmnElement="Task_SetupPayroll">
+        <dc:Bounds x="958" y="731" width="210" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_EscalateProvisioning_di" bpmnElement="Task_EscalateProvisioning">
+        <dc:Bounds x="1385" y="520" width="210" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_JoinProvisioning_di" bpmnElement="Gateway_JoinProvisioning" isMarkerVisible="true">
+        <dc:Bounds x="1300" y="495" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1242" y="523" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SendWelcome_di" bpmnElement="Task_SendWelcome">
+        <dc:Bounds x="1225" y="123" width="200" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Onboarding_di" bpmnElement="End_Onboarding">
+        <dc:Bounds x="1582" y="145" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1571" y="181" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryTimer_Payroll_di" bpmnElement="BoundaryTimer_Payroll">
+        <dc:Bounds x="1050" y="793" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1175" y="780" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryTimer_Laptop_di" bpmnElement="BoundaryTimer_Laptop">
+        <dc:Bounds x="1042" y="602" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1031" y="638" width="59" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryTimer_Accounts_di" bpmnElement="BoundaryTimer_Accounts">
         <dc:Bounds x="1045" y="435" width="36" height="36" />
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Task_ProvisionLaptop_di" bpmnElement="Task_ProvisionLaptop">
-        <dc:Bounds x="950" y="540" width="210" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryTimer_Laptop_di" bpmnElement="BoundaryTimer_Laptop">
-        <dc:Bounds x="1045" y="625" width="36" height="36" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Task_SetupPayroll_di" bpmnElement="Task_SetupPayroll">
-        <dc:Bounds x="950" y="630" width="210" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryTimer_Payroll_di" bpmnElement="BoundaryTimer_Payroll">
-        <dc:Bounds x="1045" y="715" width="36" height="36" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Task_EscalateProvisioning_di" bpmnElement="Task_EscalateProvisioning">
-        <dc:Bounds x="1220" y="560" width="210" height="80" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Gateway_JoinProvisioning_di" bpmnElement="Gateway_JoinProvisioning" isMarkerVisible="true">
-        <dc:Bounds x="1185" y="505" width="50" height="50" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Task_SendWelcome_di" bpmnElement="Task_SendWelcome">
-        <dc:Bounds x="1280" y="120" width="200" height="80" />
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="End_Onboarding_di" bpmnElement="End_Onboarding">
-        <dc:Bounds x="1490" y="145" width="36" height="36" />
-      </bpmndi:BPMNShape>
-
-      <!-- Edges -->
       <bpmndi:BPMNEdge id="Flow_O_1_di" bpmnElement="Flow_O_1">
-        <di:waypoint x="206" y="163" />
-        <di:waypoint x="250" y="160" />
+        <di:waypoint x="206" y="151" />
+        <di:waypoint x="238" y="151" />
+        <di:waypoint x="238" y="164" />
+        <di:waypoint x="270" y="164" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_2_di" bpmnElement="Flow_O_2">
-        <di:waypoint x="450" y="160" />
-        <di:waypoint x="500" y="330" />
+        <di:waypoint x="470" y="171" />
+        <di:waypoint x="600" y="171" />
+        <di:waypoint x="600" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_3_di" bpmnElement="Flow_O_3">
         <di:waypoint x="700" y="330" />
         <di:waypoint x="740" y="330" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_Reject_di" bpmnElement="Flow_O_Reject">
         <di:waypoint x="790" y="330" />
         <di:waypoint x="850" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_RejectEnd_di" bpmnElement="Flow_O_RejectEnd">
         <di:waypoint x="1060" y="330" />
-        <di:waypoint x="1100" y="330" />
+        <di:waypoint x="1202" y="330" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_Approve_di" bpmnElement="Flow_O_Approve">
         <di:waypoint x="765" y="355" />
-        <di:waypoint x="875" y="505" />
+        <di:waypoint x="765" y="415" />
+        <di:waypoint x="620" y="415" />
+        <di:waypoint x="620" y="505" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_Acct_di" bpmnElement="Flow_O_Acct">
-        <di:waypoint x="900" y="530" />
+        <di:waypoint x="645" y="530" />
+        <di:waypoint x="710" y="530" />
+        <di:waypoint x="710" y="490" />
         <di:waypoint x="950" y="490" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_Lap_di" bpmnElement="Flow_O_Lap">
-        <di:waypoint x="900" y="530" />
-        <di:waypoint x="950" y="580" />
+        <di:waypoint x="620" y="555" />
+        <di:waypoint x="620" y="771" />
+        <di:waypoint x="958" y="771" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_Pay_di" bpmnElement="Flow_O_Pay">
-        <di:waypoint x="900" y="530" />
-        <di:waypoint x="950" y="670" />
+        <di:waypoint x="645" y="530" />
+        <di:waypoint x="710" y="530" />
+        <di:waypoint x="710" y="577" />
+        <di:waypoint x="950" y="577" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_AcctDone_di" bpmnElement="Flow_O_AcctDone">
         <di:waypoint x="1160" y="490" />
-        <di:waypoint x="1185" y="530" />
+        <di:waypoint x="1198" y="490" />
+        <di:waypoint x="1198" y="520" />
+        <di:waypoint x="1300" y="520" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_LapDone_di" bpmnElement="Flow_O_LapDone">
         <di:waypoint x="1160" y="580" />
-        <di:waypoint x="1210" y="555" />
+        <di:waypoint x="1198" y="580" />
+        <di:waypoint x="1198" y="545" />
+        <di:waypoint x="1325" y="545" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_PayDone_di" bpmnElement="Flow_O_PayDone">
-        <di:waypoint x="1160" y="670" />
-        <di:waypoint x="1210" y="555" />
+        <di:waypoint x="1168" y="740" />
+        <di:waypoint x="1325" y="740" />
+        <di:waypoint x="1325" y="545" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_JoinToWelcome_di" bpmnElement="Flow_O_JoinToWelcome">
-        <di:waypoint x="1210" y="530" />
-        <di:waypoint x="1280" y="160" />
+        <di:waypoint x="1325" y="495" />
+        <di:waypoint x="1325" y="203" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_WelcomeToEnd_di" bpmnElement="Flow_O_WelcomeToEnd">
-        <di:waypoint x="1480" y="160" />
-        <di:waypoint x="1490" y="163" />
+        <di:waypoint x="1425" y="163" />
+        <di:waypoint x="1582" y="163" />
       </bpmndi:BPMNEdge>
-
       <bpmndi:BPMNEdge id="Flow_O_SLA_Acct_di" bpmnElement="Flow_O_SLA_Acct">
         <di:waypoint x="1063" y="435" />
-        <di:waypoint x="1220" y="600" />
+        <di:waypoint x="1063" y="415" />
+        <di:waypoint x="1490" y="415" />
+        <di:waypoint x="1490" y="520" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_SLA_Lap_di" bpmnElement="Flow_O_SLA_Lap">
-        <di:waypoint x="1063" y="625" />
-        <di:waypoint x="1220" y="600" />
+        <di:waypoint x="1060" y="638" />
+        <di:waypoint x="1060" y="681" />
+        <di:waypoint x="1490" y="681" />
+        <di:waypoint x="1490" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_O_SLA_Pay_di" bpmnElement="Flow_O_SLA_Pay">
-        <di:waypoint x="1063" y="715" />
-        <di:waypoint x="1220" y="600" />
+        <di:waypoint x="1068" y="829" />
+        <di:waypoint x="1068" y="850" />
+        <di:waypoint x="1490" y="850" />
+        <di:waypoint x="1490" y="600" />
       </bpmndi:BPMNEdge>
-
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
